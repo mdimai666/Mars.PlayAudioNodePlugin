@@ -1,0 +1,47 @@
+@using AppFront.Shared.Components
+@using Mars.Nodes.Core
+@using Mars.Nodes.Core.Attributes
+@using Mars.Nodes.FormEditor
+@using Mars.Nodes.FormEditor.EditForms.Components
+@using Mars.PlayAudioNodePlugin.Nodes.Nodes
+@using Microsoft.FluentUI.AspNetCore.Components
+@inherits NodeEditForm
+@attribute [NodeEditFormForNode(typeof(PlayAudioNode))]
+
+<div class="form-group compact" style="--fluent-input-label-basis:150px">
+    <div class="vstack gap-2">
+
+        <FormItem2 For="() => Node.Config">
+            <InputConfigField @bind-Value=@Node.Config TConfig="PlayAudioConfigNode" />
+        </FormItem2>
+
+        <FormItem2 For="() => Node.AudioUri">
+            <FluentTextField @bind-Value=@Node.AudioUri Class="" />
+        </FormItem2>
+
+        <FormItem2 For="() => Node.Volume">
+            <FluentSlider TValue="int" Min="-1" Max="100" Step="1" @bind-Value=volumeSetter Class="">
+                <FluentSliderLabel Position="-1">-1</FluentSliderLabel>
+                <FluentSliderLabel Position="0">0</FluentSliderLabel>
+                <FluentSliderLabel Position="50">50</FluentSliderLabel>
+                <FluentSliderLabel Position="100">100</FluentSliderLabel>
+            </FluentSlider>
+        </FormItem2>
+        <div class="text-end">
+            <span>@Node.Volume</span>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] Node? Value { get; set; }
+    PlayAudioNode Node { get => (PlayAudioNode)Value!; set => Value = value; }
+
+    int volumeSetter
+    {
+        get => Node.Volume < 0 ? -1 : (int)(Node.Volume * 100f);
+        set => Node.Volume = value < 0 ? -1f : (value / 100f);
+    }
+}
+

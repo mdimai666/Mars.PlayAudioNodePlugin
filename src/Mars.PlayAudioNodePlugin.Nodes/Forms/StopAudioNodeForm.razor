@@ -1,0 +1,22 @@
+@using AppFront.Shared.Components
+@using Mars.Nodes.Core
+@using Mars.Nodes.Core.Attributes
+@using Mars.Nodes.FormEditor
+@using Mars.Nodes.FormEditor.EditForms.Components
+@using Mars.PlayAudioNodePlugin.Nodes.Nodes
+@using Microsoft.FluentUI.AspNetCore.Components
+@inherits NodeEditForm
+@attribute [NodeEditFormForNode(typeof(StopAudioNode))]
+
+<div class="form-group compact" style="--fluent-input-label-basis:150px">
+    <div class="vstack gap-2">
+
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] Node? Value { get; set; }
+    StopAudioNode Node { get => (StopAudioNode)Value!; set => Value = value; }
+
+}
+

@@ -1,0 +1,65 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36119.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mars.PlayAudioNodePlugin", "src\Mars.PlayAudioNodePlugin\Mars.PlayAudioNodePlugin.csproj", "{49889750-9A40-4D67-9E6D-A91B32D090BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mars.PlayAudioNodePlugin.Nodes", "src\Mars.PlayAudioNodePlugin.Nodes\Mars.PlayAudioNodePlugin.Nodes.csproj", "{8F478F4B-5794-4286-889A-791918620A64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "devStands", "devStands", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayAudioNodePluginConsoleApp", "src\PlayAudioNodePluginConsoleApp\PlayAudioNodePluginConsoleApp.csproj", "{3D87C1F5-8202-4F9F-A74C-0E10BFD5E4F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mars.PlayAudioNodePlugin.Shared", "src\Mars.PlayAudioNodePlugin.Shared\Mars.PlayAudioNodePlugin.Shared.csproj", "{ACAE1CEB-1A43-400B-AAE5-7EABAADC5AEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mars.PlayAudioNodePlugin.Host.Shared", "src\Mars.PlayAudioNodePlugin.Host.Shared\Mars.PlayAudioNodePlugin.Host.Shared.csproj", "{24E90D0D-49B5-4E66-84B5-01CDC7F99923}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mars.PlayAudioNodePlugin.Host", "src\Mars.PlayAudioNodePlugin.Host\Mars.PlayAudioNodePlugin.Host.csproj", "{07921485-61FE-40C4-BFEA-87061F03E4AE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49889750-9A40-4D67-9E6D-A91B32D090BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49889750-9A40-4D67-9E6D-A91B32D090BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49889750-9A40-4D67-9E6D-A91B32D090BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49889750-9A40-4D67-9E6D-A91B32D090BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F478F4B-5794-4286-889A-791918620A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F478F4B-5794-4286-889A-791918620A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F478F4B-5794-4286-889A-791918620A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F478F4B-5794-4286-889A-791918620A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D87C1F5-8202-4F9F-A74C-0E10BFD5E4F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D87C1F5-8202-4F9F-A74C-0E10BFD5E4F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D87C1F5-8202-4F9F-A74C-0E10BFD5E4F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D87C1F5-8202-4F9F-A74C-0E10BFD5E4F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACAE1CEB-1A43-400B-AAE5-7EABAADC5AEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACAE1CEB-1A43-400B-AAE5-7EABAADC5AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACAE1CEB-1A43-400B-AAE5-7EABAADC5AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACAE1CEB-1A43-400B-AAE5-7EABAADC5AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24E90D0D-49B5-4E66-84B5-01CDC7F99923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24E90D0D-49B5-4E66-84B5-01CDC7F99923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24E90D0D-49B5-4E66-84B5-01CDC7F99923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24E90D0D-49B5-4E66-84B5-01CDC7F99923}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07921485-61FE-40C4-BFEA-87061F03E4AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07921485-61FE-40C4-BFEA-87061F03E4AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07921485-61FE-40C4-BFEA-87061F03E4AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07921485-61FE-40C4-BFEA-87061F03E4AE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3D87C1F5-8202-4F9F-A74C-0E10BFD5E4F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DAB1B565-9604-4B55-BF82-14FF600EB9A9}
+	EndGlobalSection
+EndGlobal

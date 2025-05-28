@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Mars with plugin": {
+        "commandName": "Executable",
+        "executablePath": "..\\..\\..\\Mars\\src\\Mars.WebApp\\bin\\Debug\\net9.0\\Mars.exe",
+        "commandLineArgs": " -cfg ..\\..\\..\\Mars.PlayAudioNodePlugin\\src\\Mars.PlayAudioNodePlugin\\appsettings.local.json",
+        "workingDirectory": "..\\..\\..\\Mars\\src\\Mars.WebApp\\",
+        "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+    }
+  }
+}

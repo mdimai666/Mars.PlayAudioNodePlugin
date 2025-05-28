@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <NoWarn>CS8321</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Mars.PlayAudioNodePlugin.Host\Mars.PlayAudioNodePlugin.Host.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Samples\" />
+    </ItemGroup>
+
+
+
+</Project>

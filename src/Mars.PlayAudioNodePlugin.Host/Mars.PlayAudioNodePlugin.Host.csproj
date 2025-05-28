@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net9.0;net9.0-windows</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+        <!--<Platforms>AnyCPU;x64;arm64</Platforms>-->
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="C:\Users\D\.nuget\packages\naudio.vorbis\1.5.0\contentFiles\any\netstandard2.0\README.md" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Mars.PlayAudioNodePlugin.Host.Shared\Mars.PlayAudioNodePlugin.Host.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
+		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>PlayAudioNodePluginConsoleApp</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+</Project>

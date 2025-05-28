@@ -19,6 +19,7 @@ public class PlayAudioService : IPlayAudioService
         var device = ResolveAudioDevice(outputDeviceId);
 
         ResolveFileStreamProvider(stream, out var audioFile);
+        audioFile.Position = 0;
         //var readerStream = new MediaFoundationReader(filePath);
         //ResolveFileStreamProvider(filepath, out var audioFile);
         using var outputDevice = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
@@ -44,26 +45,35 @@ public class PlayAudioService : IPlayAudioService
     {
         volume = Math.Clamp(volume, 0f, 1f); // 0.0 — тишина, 1.0 — макс. громкость
 
-        var device = ResolveAudioDevice(outputDeviceId);
-
-        ResolveFileStreamProvider(filepath, out var audioFile);
-        using var outputDevice = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
-        //audioFile.Volume = volume;
-        var sampleChannel = new SampleChannel(audioFile, forceStereo: false);
-        sampleChannel.Volume = volume;
-
-        outputDevice.Init(audioFile);
-        outputDevice.Play();
-        var ct = cancellationTokenSource.Token;
-
-        while (outputDevice.PlaybackState == PlaybackState.Playing)
+        FileStream? fileStream = null;
+        try
         {
-            if (ct.IsCancellationRequested)
+            var device = ResolveAudioDevice(outputDeviceId);
+
+            ResolveFileStreamProvider(filepath, out var audioFile, out fileStream);
+            audioFile.Position = 0;
+            using var outputDevice = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
+            //audioFile.Volume = volume;
+            var sampleChannel = new SampleChannel(audioFile, forceStereo: false);
+            sampleChannel.Volume = volume;
+
+            outputDevice.Init(audioFile);
+            outputDevice.Play();
+            var ct = cancellationTokenSource.Token;
+
+            while (outputDevice.PlaybackState == PlaybackState.Playing)
             {
-                outputDevice.Stop();
-                break;
+                if (ct.IsCancellationRequested)
+                {
+                    outputDevice.Stop();
+                    break;
+                }
+                await Task.Delay(100);
             }
-            await Task.Delay(100);
+        }
+        finally
+        {
+            fileStream?.Dispose();
         }
     }
 
@@ -75,11 +85,20 @@ public class PlayAudioService : IPlayAudioService
         cancellationTokenSource = new();
     }
 
-    internal void ResolveFileStreamProvider(string filePath, out WaveStream readerStream)
+    internal void ResolveFileStreamProvider(string filePath, out WaveStream readerStream, out FileStream? fileStream)
     {
+        if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            readerStream = new MediaFoundationReader(filePath);
+            fileStream = null;
+            return;
+        }
+
+        fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
         if (filePath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
         {
-            readerStream = new WaveFileReader(filePath);
+            readerStream = new WaveFileReader(fileStream);
             if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
             {
                 readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
@@ -88,22 +107,24 @@ public class PlayAudioService : IPlayAudioService
         }
         else if (filePath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
         {
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                readerStream = new Mp3FileReader(filePath);
-            }
-            else
-            {
-                readerStream = new MediaFoundationReader(filePath);
-            }
+            //if (Environment.OSVersion.Version.Major < 6)
+            //{
+            //    readerStream = new Mp3FileReader(inputStream);
+            //}
+            //else
+            //{
+            //    readerStream = new MediaFoundationReader(filePath);
+            //}
+
+            readerStream = new Mp3FileReader(fileStream);
         }
         else if (filePath.EndsWith(".aiff", StringComparison.OrdinalIgnoreCase) || filePath.EndsWith(".aif", StringComparison.OrdinalIgnoreCase))
         {
-            readerStream = new AiffFileReader(filePath);
+            readerStream = new AiffFileReader(fileStream);
         }
         else if (filePath.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase))
         {
-            readerStream = new NAudio.Vorbis.VorbisWaveReader(filePath);
+            readerStream = new NAudio.Vorbis.VorbisWaveReader(fileStream);
         }
         else
         {

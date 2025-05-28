@@ -34,7 +34,7 @@ public class PlayAudioNodeImpl : INodeImplement<PlayAudioNode>, INodeImplement
         {
             await _playAudioService.Play(Node.AudioUri, volume, outputDeviceId);
         }
-        if (input.Payload is string payloadFilePath)
+        else if (input.Payload is string payloadFilePath)
         {
             await _playAudioService.Play(payloadFilePath, volume, outputDeviceId);
         }

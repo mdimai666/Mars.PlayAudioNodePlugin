@@ -1,5 +1,5 @@
-$exe = "C:\\Users\\D\\Documents\\VisualStudio\\2023\\Blast\\Blast\\bin\\Debug\\net6.0\\Blast.exe"
-$cfg = "C:\\Users\\D\\Documents\\VisualStudio\\2023\\Blast\\Blast\\appsettings.summer2023.local.json"
+$exe = "..\\..\\..\\Mars\\src\\Mars.WebApp\\bin\\Debug\\net9.0\\Mars.exe"
+$cfg = "..\\..\\..\\Mars\\src\\Mars.WebApp\\appsettings.local.json"
 
 $env:ASPNETCORE_ENVIRONMENT="Development"
 

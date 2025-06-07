@@ -18,6 +18,12 @@
             - Play audio
             - List output devices
         </Description>
+        <PackageIcon>icon.png</PackageIcon>
+        <RepositoryUrl>https://github.com/mdimai666/Mars.PlayAudioNodePlugin</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        
         <EnableDynamicLoading>true</EnableDynamicLoading>
         <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
     </PropertyGroup>
@@ -25,6 +31,8 @@
     <ItemGroup>
         <AssemblyMetadata Include="PackageTags" Value="$(PackageTags)" />
         <AssemblyMetadata Include="PackageId" Value="$(PackageId)" />
+        <AssemblyMetadata Include="RepositoryUrl" Value="$(RepositoryUrl)" />
+        <AssemblyMetadata Include="PackageIcon" Value="$(PackageIcon)" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,9 +40,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="mdimai666.Mars.Plugin.PluginPublishScript" Version="0.6.2-alpha.25" />
+        <None Include="..\..\assets\icon.png" Pack="true" PackagePath="\" Link="wwwroot\icon.png" CopyToOutputDirectory="PreserveNewest" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="mdimai666.Mars.Plugin.PluginPublishScript" Version="0.6.2-alpha.26" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.2" PrivateAssets="all" />
-        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.6.2-alpha.25" />
+        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.6.2-alpha.26" />
     </ItemGroup>
 
     <ItemGroup>

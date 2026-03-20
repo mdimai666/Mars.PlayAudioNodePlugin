@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <NoWarn>CS8321</NoWarn>
@@ -15,7 +15,5 @@
     <ItemGroup>
         <Folder Include="Samples\" />
     </ItemGroup>
-
-
 
 </Project>

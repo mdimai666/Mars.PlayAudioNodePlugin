@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Mars.Core.Attributes;
 using Mars.Nodes.Core;
-using Mars.Nodes.Core.Nodes;
+using Mars.Nodes.Core.Fields;
 
 namespace Mars.PlayAudioNodePlugin.Nodes.Nodes;
 
@@ -22,9 +22,9 @@ public class PlayAudioNode : Node
 
     public PlayAudioNode()
     {
-        HaveInput = true;
+        Inputs = [new()];
         Color = "#e84468";
-        Outputs = new List<NodeOutput> { new NodeOutput() { Label = "after play" } };
+        Outputs = [new() { Label = "after play" }];
         Icon = "/_plugin/Mars.PlayAudioNodePlugin/icons/play-sound.svg";
     }
 }

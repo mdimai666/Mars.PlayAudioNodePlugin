@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 
@@ -18,8 +18,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="mdimai666.Mars.Plugin.Kit.Front" Version="0.6.2-alpha.26" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.5" />
+		<PackageReference Include="mdimai666.Mars.Plugin.Kit.Front" Version="0.7.3-alpha.7" />
+		<!--<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.7" />-->
 	</ItemGroup>
 
 	<ItemGroup>

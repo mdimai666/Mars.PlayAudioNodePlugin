@@ -8,7 +8,7 @@ public class StopAudioNode : Node
 {
     public StopAudioNode()
     {
-        HaveInput = true;
+        Inputs = [new()];
         Color = "#e84468";
         Outputs = [];
         Icon = "/_plugin/Mars.PlayAudioNodePlugin/icons/stop-sound.svg";

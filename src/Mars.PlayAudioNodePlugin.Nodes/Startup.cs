@@ -1,6 +1,4 @@
-using Mars.Nodes.Core;
-using Mars.PlayAudioNodePlugin.Nodes.Forms;
-using Mars.PlayAudioNodePlugin.Nodes.Nodes;
+using Mars.Plugin.Front;
 using Mars.Plugin.Front.Abstractions;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -12,13 +10,13 @@ public class PlayAudioNodePluginFront : IWebAssemblyPluginFront
     {
         //Console.WriteLine("> plugin ConfigureServices!");
 
-        NodesLocator.RegisterAssembly(typeof(PlayAudioNode).Assembly);
-        NodeFormsLocator.RegisterAssembly(typeof(PlayAudioNodeForm).Assembly);
+        //NodesLocator.RegisterAssembly(typeof(PlayAudioNode).Assembly);
+        //NodeFormsLocator.RegisterAssembly(typeof(PlayAudioNodeForm).Assembly);
     }
 
     public void ConfigureApplication(WebAssemblyHost app)
     {
+        app.Services.AutoFrontRegisterHelper([GetType().Assembly]);
         //Console.WriteLine("> plugin ConfigureApplication!");
     }
 }
-

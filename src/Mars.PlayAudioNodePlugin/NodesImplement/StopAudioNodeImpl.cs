@@ -21,7 +21,7 @@ public class StopAudioNodeImpl : INodeImplement<StopAudioNode>, INodeImplement
         _playAudioService = red.ServiceProvider.GetRequiredService<IPlayAudioService>();
     }
 
-    public Task Execute(NodeMsg input, ExecuteAction callback)
+    public Task Execute(NodeMsg input, ExecuteAction callback, ExecutionParameters parameters)
     {
         _playAudioService.StopAll();
         RED.DebugMsg(DebugMessage.NodeMessage(Node.Id, "stop all audio"));

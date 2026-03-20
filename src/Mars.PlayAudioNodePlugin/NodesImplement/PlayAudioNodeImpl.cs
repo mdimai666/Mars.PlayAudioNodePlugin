@@ -23,7 +23,7 @@ public class PlayAudioNodeImpl : INodeImplement<PlayAudioNode>, INodeImplement
         _playAudioService = red.ServiceProvider.GetRequiredService<IPlayAudioService>();
     }
 
-    public async Task Execute(NodeMsg input, ExecuteAction callback)
+    public async Task Execute(NodeMsg input, ExecuteAction callback, ExecutionParameters parameters)
     {
         var volume = ResolveVolume();
         var outputDeviceId = ResolveOutputDeviceId();

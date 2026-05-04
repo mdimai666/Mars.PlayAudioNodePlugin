@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -45,9 +45,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="mdimai666.Mars.Plugin.PluginPublishScript" Version="0.7.3-alpha.7" />
+        <PackageReference Include="mdimai666.Mars.Plugin.PluginPublishScript" Version="0.7.4-alpha.10" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.5" PrivateAssets="all" />
-        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.7.3-alpha.7" />
+        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.7.4-alpha.10" />
     </ItemGroup>
 
     <ItemGroup>
@@ -62,7 +62,7 @@
         <ProjectReference Include="..\Mars.PlayAudioNodePlugin.Nodes\Mars.PlayAudioNodePlugin.Nodes.csproj" />
     </ItemGroup>
 
-    <Target Name="RunPostPublishScript" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+    <Target Name="RunPostPublishScript" AfterTargets="111Publish" Condition="'$(Configuration)' == 'Release'">
         <Exec Command="dotnet $(NuGetPackageRoot)mdimai666.Mars.Plugin.PluginPublishScript\0.6.7-alpha.7\lib\net10.0\Mars.Plugin.PluginPublishScript.dll --run-postpublish --ProjectName=$(ProjectName) --out=$(PublishDir) --ProjectDir=$(ProjectDir)" />
     </Target>
 

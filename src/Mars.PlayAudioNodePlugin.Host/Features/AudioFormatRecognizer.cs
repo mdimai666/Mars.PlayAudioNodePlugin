@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Mars.PlayAudioNodePlugin.Host.Features;
 
-public class AudioFormatRecognizer
+public static class AudioFormatRecognizer
 {
     /// <summary>
     /// <list type="bullet">

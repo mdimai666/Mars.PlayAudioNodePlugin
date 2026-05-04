@@ -4,7 +4,6 @@ using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Shared.Dto;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 
 namespace Mars.PlayAudioNodePlugin.Host.Services;
 
@@ -16,46 +15,17 @@ public class PlayAudioService : IPlayAudioService
     {
         volume = Math.Clamp(volume, 0f, 1f); // 0.0 — тишина, 1.0 — макс. громкость
 
-        var device = ResolveAudioDevice(outputDeviceId);
+        WaveStream? audioFile = null;
 
-        ResolveFileStreamProvider(stream, out var audioFile);
-        audioFile.Position = 0;
-        //var readerStream = new MediaFoundationReader(filePath);
-        //ResolveFileStreamProvider(filepath, out var audioFile);
-        using var outputDevice = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
-        var sampleChannel = new SampleChannel(audioFile, forceStereo: false);
-        sampleChannel.Volume = volume;
-
-        outputDevice.Init(audioFile);
-        outputDevice.Play();
-        var ct = cancellationTokenSource.Token;
-
-        while (outputDevice.PlaybackState == PlaybackState.Playing)
-        {
-            if (ct.IsCancellationRequested)
-            {
-                outputDevice.Stop();
-                break;
-            }
-            await Task.Delay(100);
-        }
-    }
-
-    public async Task Play(string filepath, float volume = 1, string outputDeviceId = "")
-    {
-        volume = Math.Clamp(volume, 0f, 1f); // 0.0 — тишина, 1.0 — макс. громкость
-
-        FileStream? fileStream = null;
         try
         {
-            var device = ResolveAudioDevice(outputDeviceId);
+            var deviceNumber = ResolveAudioDeviceNumber(outputDeviceId);
 
-            ResolveFileStreamProvider(filepath, out var audioFile, out fileStream);
-            audioFile.Position = 0;
-            using var outputDevice = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
-            //audioFile.Volume = volume;
-            var sampleChannel = new SampleChannel(audioFile, forceStereo: false);
-            sampleChannel.Volume = volume;
+            //using var audioFile = new StreamMediaFoundationReader(stream);
+            ResolveFileStreamProvider(stream, out audioFile);
+            using var outputDevice = new WaveOutEvent();
+            outputDevice.DeviceNumber = deviceNumber;
+            outputDevice.Volume = volume;
 
             outputDevice.Init(audioFile);
             outputDevice.Play();
@@ -73,6 +43,45 @@ public class PlayAudioService : IPlayAudioService
         }
         finally
         {
+            audioFile?.Dispose();
+        }
+    }
+
+    public async Task Play(string filepath, float volume = 1, string outputDeviceId = "")
+    {
+        volume = Math.Clamp(volume, 0f, 1f); // 0.0 — тишина, 1.0 — макс. громкость
+
+        FileStream? fileStream = null;
+        WaveStream? audioFile = null;
+
+        try
+        {
+            var deviceNumber = ResolveAudioDeviceNumber(outputDeviceId);
+
+            //using var audioFile = new AudioFileReader(filepath);
+            ResolveFileStreamProvider(filepath, out audioFile, out fileStream);
+
+            using var outputDevice = new WaveOutEvent();
+            outputDevice.DeviceNumber = deviceNumber;
+            outputDevice.Volume = volume;
+
+            outputDevice.Init(audioFile);
+            outputDevice.Play();
+            var ct = cancellationTokenSource.Token;
+
+            while (outputDevice.PlaybackState == PlaybackState.Playing)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    outputDevice.Stop();
+                    break;
+                }
+                await Task.Delay(100);
+            }
+        }
+        finally
+        {
+            audioFile?.Dispose();
             fileStream?.Dispose();
         }
     }
@@ -98,12 +107,14 @@ public class PlayAudioService : IPlayAudioService
 
         if (filePath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
         {
-            readerStream = new WaveFileReader(fileStream);
-            if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
-            {
-                readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-                readerStream = new BlockAlignReductionStream(readerStream);
-            }
+            //readerStream = new WaveFileReader(fileStream);
+            //if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
+            //{
+            //    readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
+            //    readerStream = new BlockAlignReductionStream(readerStream);
+            //}
+
+            readerStream = new AudioFileReader(filePath);
         }
         else if (filePath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
         {
@@ -132,43 +143,20 @@ public class PlayAudioService : IPlayAudioService
         }
     }
 
-    internal MMDevice ResolveAudioDevice(string id)
-    {
-        using var enumerator = new MMDeviceEnumerator();
-
-        if (string.IsNullOrEmpty(id))
-        {
-            var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            return defaultDevice;
-        }
-
-        return enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
-            .FirstOrDefault(x => x.ID == id) ?? throw new ArgumentException($"device id='{id}' not found");
-    }
-
-    internal IEnumerable<MMDevice> EnumerateAudioEndPoints()
-    {
-        using var enumerator = new MMDeviceEnumerator();
-        var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-
-        var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
-            .Where(x => x.ID != defaultDevice.ID).Prepend(defaultDevice);
-
-        return devices;
-    }
-
     internal void ResolveFileStreamProvider(Stream inputStream, out WaveStream readerStream)
     {
         var ext = AudioFormatRecognizer.RecognizeAudioFormat(inputStream);
+        inputStream.Position = 0;
 
         if (ext == "WAV")
         {
-            readerStream = new WaveFileReader(inputStream);
-            if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
-            {
-                readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-                readerStream = new BlockAlignReductionStream(readerStream);
-            }
+            //readerStream = new WaveFileReader(inputStream);
+            //if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
+            //{
+            //    readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
+            //    readerStream = new BlockAlignReductionStream(readerStream);
+            //}
+            readerStream = new StreamMediaFoundationReader(inputStream);
         }
         else if (ext == "MP3")
         {
@@ -195,6 +183,46 @@ public class PlayAudioService : IPlayAudioService
         //}
         else
             throw new NotImplementedException($"type not recognized '{ext}'");
+    }
+
+    internal MMDevice ResolveAudioDevice(string id)
+    {
+        using var enumerator = new MMDeviceEnumerator();
+
+        if (string.IsNullOrEmpty(id))
+        {
+            var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+            return defaultDevice;
+        }
+
+        return enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
+            .FirstOrDefault(x => x.ID == id) ?? throw new ArgumentException($"device id='{id}' not found");
+    }
+    internal int ResolveAudioDeviceNumber(string id)
+    {
+
+        if (string.IsNullOrEmpty(id))
+        {
+            return -1;//default device
+        }
+
+        using var enumerator = new MMDeviceEnumerator();
+        var list = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).Select(s => s.ID).ToArray();
+
+        var index = list.IndexOf(id);
+
+        return index > -1 ? index : throw new ArgumentException($"device id='{id}' not found");
+    }
+
+    internal IEnumerable<MMDevice> EnumerateAudioEndPoints()
+    {
+        using var enumerator = new MMDeviceEnumerator();
+        var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+
+        var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
+            .Where(x => x.ID != defaultDevice.ID).Prepend(defaultDevice);
+
+        return devices;
     }
 
     public OutputDeviceResponse[] OutputDevices()

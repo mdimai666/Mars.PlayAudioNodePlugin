@@ -12,8 +12,4 @@
         <ProjectReference Include="..\Mars.PlayAudioNodePlugin.Host\Mars.PlayAudioNodePlugin.Host.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Samples\" />
-    </ItemGroup>
-
 </Project>

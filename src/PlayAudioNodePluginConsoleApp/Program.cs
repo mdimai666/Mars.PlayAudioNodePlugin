@@ -14,9 +14,11 @@ foreach (var device in devices)
     Console.WriteLine($"{device.ID}={device.FriendlyName}");
 }
 
-var file = @"..\..\..\Samples\game-win.mp3";
+var samplesDirPrefix = "../../../../tests/Test.PlayAudioNodePlugin/Samples/";
 
-//var file = @"..\..\..\Samples\guiclick.ogg";
+var file = samplesDirPrefix + "game-win.mp3";
+
+//var file = samplesDirPrefix + "guiclick.ogg";
 //await PlayAsync(file);
 //using var fileReader = new FileStream(file, FileMode.Open);
 #if STOP_TEST
@@ -25,9 +27,9 @@ await Task.Delay(500);
 //await pas.Play(file);
 pas.StopAll();
 #else
-var audioPath = @"C:\Users\D\AppData\Local\Temp\salutespeech_cache\2F95B178C84459D0.wav";
-//audioPath = @"..\..\..\Samples\guiclick.ogg";
-//audioPath = @"..\..\..\Samples\game-win.mp3";
+var audioPath = samplesDirPrefix + samplesDirPrefix + "streat_audio_without-header.wav";
+//audioPath = samplesDirPrefix + "guiclick.ogg";
+//audioPath = samplesDirPrefix + "game-win.mp3";
 var bytes = await File.ReadAllBytesAsync(audioPath);
 var ms = new MemoryStream(bytes);
 await pas.Play(ms);

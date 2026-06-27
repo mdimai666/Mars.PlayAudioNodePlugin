@@ -1,26 +1,26 @@
 using Mars.Nodes.Core;
 using Mars.Nodes.Core.Exceptions;
-using Mars.Nodes.Core.Implements;
+using Mars.Nodes.Host.Shared;
 using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Nodes.Nodes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mars.PlayAudioNodePlugin.NodesImplement;
 
-public class PlayAudioNodeImpl : INodeImplement<PlayAudioNode>, INodeImplement
+public class PlayAudioNodeImpl : INodeImplement<PlayAudioNode>
 {
     public PlayAudioNode Node { get; }
-    public IRED RED { get; set; }
-    Node INodeImplement<Node>.Node => Node;
+    public IRuntimeNodeScope RNS { get; set; }
+    Node INodeImplement.Node => Node;
     IPlayAudioService _playAudioService;
 
-    public PlayAudioNodeImpl(PlayAudioNode node, IRED red)
+    public PlayAudioNodeImpl(PlayAudioNode node, IRuntimeNodeScope rns)
     {
         Node = node;
-        RED = red;
+        RNS = rns;
 
-        Node.Config = RED.GetConfig(node.Config);
-        _playAudioService = red.ServiceProvider.GetRequiredService<IPlayAudioService>();
+        Node.Config = RNS.GetConfig(node.Config);
+        _playAudioService = rns.ServiceProvider.GetRequiredService<IPlayAudioService>();
     }
 
     public async Task Execute(NodeMsg input, ExecuteAction callback, ExecutionParameters parameters)

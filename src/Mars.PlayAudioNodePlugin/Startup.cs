@@ -35,7 +35,7 @@ public class MainMarsPlayAudioNodePlugin : WebApplicationPlugin
         });
 
 #if DEBUG
-        app.UseDevelopingServePluginFilesDefinition(GetType().Assembly, settings, [typeof(PlayAudioNodePluginFront).Assembly]);
+        app.UseDevelopingServePluginFilesDefinition(GetType().Assembly, settings, [typeof(PlayAudioNodePluginFront).Assembly, GetType().Assembly]);
 #endif
 
         //var op = app.Services.GetRequiredService<IOptionService>();

@@ -1,9 +1,9 @@
 using Mars.Nodes.Core;
 using Mars.Nodes.Core.Exceptions;
 using Mars.Nodes.Host.Shared;
+using Mars.PlayAudioNodePlugin.Host.Services;
 using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Nodes.Nodes;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Mars.PlayAudioNodePlugin.NodesImplement;
 
@@ -12,15 +12,18 @@ public class PlayAudioNodeImpl : INodeImplement<PlayAudioNode>
     public PlayAudioNode Node { get; }
     public IRuntimeNodeScope RNS { get; set; }
     Node INodeImplement.Node => Node;
-    IPlayAudioService _playAudioService;
+    private readonly IPlayAudioService _playAudioService;
+    private readonly BuiltInSoundsService _builtInSoundsService;
 
-    public PlayAudioNodeImpl(PlayAudioNode node, IRuntimeNodeScope rns)
+    public PlayAudioNodeImpl(PlayAudioNode node, IRuntimeNodeScope rns, IPlayAudioService playAudioService, BuiltInSoundsService builtInSoundsService)
     {
         Node = node;
         RNS = rns;
 
+        _playAudioService = playAudioService;
+        _builtInSoundsService = builtInSoundsService;
+
         Node.Config = RNS.GetConfig(node.Config);
-        _playAudioService = rns.ServiceProvider.GetRequiredService<IPlayAudioService>();
     }
 
     public async Task Execute(NodeMsg input, ExecuteAction callback, ExecutionParameters parameters)
@@ -29,6 +32,14 @@ public class PlayAudioNodeImpl : INodeImplement<PlayAudioNode>
         var outputDeviceId = ResolveOutputDeviceId();
 
         //replace by FileStorage
+
+        if (Node.PlayFromBuiltInSounds)
+        {
+            var buildInSoundPath = _builtInSoundsService.FullPathByName(Node.BuiltInSoundsName);
+            await _playAudioService.Play(buildInSoundPath, volume, outputDeviceId);
+            callback(input);
+            return;
+        }
 
         if (!string.IsNullOrEmpty(Node.AudioUri))
         {

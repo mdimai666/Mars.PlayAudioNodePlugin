@@ -1,6 +1,7 @@
 using Mars.Host.Shared.Services;
 using Mars.PlayAudioNodePlugin;
 using Mars.PlayAudioNodePlugin.Host;
+using Mars.PlayAudioNodePlugin.Host.Services;
 using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Nodes;
 using Mars.PlayAudioNodePlugin.Nodes.Nodes;
@@ -8,6 +9,8 @@ using Mars.Plugin.Abstractions;
 using Mars.Plugin.Kit.Host;
 using Mars.Plugin.PluginHost;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 [assembly: WebApplicationPlugin(typeof(MainMarsPlayAudioNodePlugin))]
 
@@ -19,7 +22,7 @@ public class MainMarsPlayAudioNodePlugin : WebApplicationPlugin
 
     public override void ConfigureWebApplicationBuilder(WebApplicationBuilder builder, PluginSettings settings)
     {
-        builder.Services.AddPlayAudioService();
+        builder.Services.AddPlayAudioService(settings, GetType().Assembly);
     }
 
     public override void ConfigureWebApplication(WebApplication app, PluginSettings settings)
@@ -30,8 +33,19 @@ public class MainMarsPlayAudioNodePlugin : WebApplicationPlugin
 
         app.MapGet("/api/PlayAudioNodePlugin/OutputDevices", (IPlayAudioService pas) =>
         {
-            var devices = pas.OutputDevices();
-            return devices;
+            return pas.OutputDevices();
+        });
+
+        app.MapGet("/api/PlayAudioNodePlugin/BuiltInSounds", (BuiltInSoundsService ss) =>
+        {
+            return TypedResults.Ok(ss.SoundList());
+        });
+
+        app.MapPut("/api/PlayAudioNodePlugin/DemoPlayBuiltInSound", ([FromBody] string soundName, BuiltInSoundsService ss, IPlayAudioService pas) =>
+        {
+            var filePath = ss.FullPathByName(soundName);
+            _ = pas.Play(filePath, 1f);
+            return TypedResults.Ok();
         });
 
 #if DEBUG

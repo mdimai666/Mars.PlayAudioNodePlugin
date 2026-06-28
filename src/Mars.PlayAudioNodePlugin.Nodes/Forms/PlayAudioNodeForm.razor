@@ -1,9 +1,13 @@
 @using AppFront.Shared.Components
+@using Flurl.Http
+@using Mars.Core.Extensions
+@using Mars.Core.Models
 @using Mars.Nodes.Core
 @using Mars.Nodes.Core.Attributes
 @using Mars.Nodes.FormEditor
 @using Mars.Nodes.FormEditor.EditForms.Components
 @using Mars.PlayAudioNodePlugin.Nodes.Nodes
+@using Microsoft.Extensions.Caching.Memory
 @using Microsoft.FluentUI.AspNetCore.Components
 @inherits NodeEditForm
 @attribute [NodeEditFormForNode(typeof(PlayAudioNode))]
@@ -15,21 +19,31 @@
             <InputConfigField @bind-Value=@Node.Config TConfig="PlayAudioConfigNode" />
         </FormItem2>
 
-        <FormItem2 For="() => Node.AudioUri">
-            <FluentTextField @bind-Value=@Node.AudioUri Class="" />
+        <FormItem2 For="() => Node.PlayFromBuiltInSounds">
+            <FluentCheckbox @bind-Value=@Node.PlayFromBuiltInSounds />
         </FormItem2>
 
+        @if (Node.PlayFromBuiltInSounds)
+        {
+            <FormItem2 For="() => Node.BuiltInSoundsName">
+                <FluentSelect TOption="string"
+                              Items="_builtInSounds"
+                              Class=""
+                              SelectedOptionChanged="SelectedOptionChanged_BuiltInSoundsName"
+                              @bind-Value=@Node.BuiltInSoundsName />
+            </FormItem2>
+        }
+        else
+        {
+
+            <FormItem2 For="() => Node.AudioUri">
+                <FluentTextField @bind-Value=@Node.AudioUri Class="w-100" />
+            </FormItem2>
+        }
+
         <FormItem2 For="() => Node.Volume">
-            <FluentSlider TValue="int" Min="-1" Max="100" Step="1" @bind-Value=volumeSetter Class="">
-                <FluentSliderLabel Position="-1">-1</FluentSliderLabel>
-                <FluentSliderLabel Position="0">0</FluentSliderLabel>
-                <FluentSliderLabel Position="50">50</FluentSliderLabel>
-                <FluentSliderLabel Position="100">100</FluentSliderLabel>
-            </FluentSlider>
+            <FluentNumberField @bind-Value=@Node.Volume Min="-1" Step="0.2" />
         </FormItem2>
-        <div class="text-end">
-            <span>@Node.Volume</span>
-        </div>
 
     </div>
 </div>
@@ -38,10 +52,44 @@
     [CascadingParameter] Node? Value { get; set; }
     PlayAudioNode Node { get => (PlayAudioNode)Value!; set => Value = value; }
 
-    int volumeSetter
+    [Inject] IFlurlClient _client { get; set; } = default!;
+    [Inject] AppFront.Shared.Interfaces.IMessageService _messageService { get; set; } = default!;
+    [Inject] IMemoryCache _cache { get; set; } = default!;
+
+    string _builtInSoundsUrl = "/api/PlayAudioNodePlugin/BuiltInSounds";
+    string[] _builtInSounds = [];
+    string _demoPlayBuiltInSoundUrl = "/api/PlayAudioNodePlugin/DemoPlayBuiltInSound";
+
+    protected override void OnParametersSet()
     {
-        get => Node.Volume < 0 ? -1 : (int)(Node.Volume * 100f);
-        set => Node.Volume = value < 0 ? -1f : (value / 100f);
+        base.OnParametersSet();
+
+        if (_builtInSounds.Length == 0) Load();
+    }
+
+    async void Load()
+    {
+        try
+        {
+            _builtInSounds = await _cache.GetOrCreateAsync<string[]>("PlayAudioNodePlugin:BuiltInSounds", entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                return _client.Request(_builtInSoundsUrl).GetJsonAsync<string[]>();
+            }) ?? [];
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _ = _messageService.Error(ex.Message);
+        }
+    }
+
+    void SelectedOptionChanged_BuiltInSoundsName(string name)
+    {
+        if (name.IsNotNullOrEmpty())
+        {
+            _client.Request(_demoPlayBuiltInSoundUrl).PutJsonAsync(name);
+        }
     }
 }
-

@@ -24,7 +24,7 @@
         </FormItem2>
 
         <FormItem2 For="() => Node.DefaultPlayVolume">
-            <FluentNumberField TValue="float" @bind-Value=@Node.DefaultPlayVolume Class="" Min="-1" Max="1" />
+            <FluentNumberField TValue="float" @bind-Value=@Node.DefaultPlayVolume Class="" Min="-1" />
         </FormItem2>
 
     </div>
@@ -40,7 +40,6 @@
 
     [Inject] IFlurlClient _client { get; set; } = default!;
     [Inject] AppFront.Shared.Interfaces.IMessageService _messageService { get; set; } = default!;
-
 
     protected override void OnParametersSet()
     {
@@ -70,4 +69,3 @@
         }
     }
 }
-

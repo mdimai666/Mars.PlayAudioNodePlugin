@@ -61,4 +61,28 @@ public class AudioPlayTests
         //Assert
         // just listen
     }
+
+    [Theory]
+    [MemberData(nameof(AudioListData))]
+    public async Task Play_VolumeGreaterThanOne_ShouldPlayWithoutExceptions(string fileName)
+    {
+        // Arrange
+        var pas = new PlayAudioService();
+        var filePath = Path.Combine(AudioSamplesPath, fileName);
+        float amplifiedVolume = 3.5f;
+
+        _ = pas.Play(filePath, 1f);
+        await Task.Delay(1000);
+        pas.StopAll();
+
+        // Act
+        var playTask = () => pas.Play(filePath, amplifiedVolume);
+
+        await Task.Delay(1000);
+        pas.StopAll();
+
+        // Assert
+        await playTask.Should().NotThrowAsync();
+    }
+
 }

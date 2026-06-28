@@ -4,6 +4,7 @@ using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Shared.Dto;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace Mars.PlayAudioNodePlugin.Host.Services;
 
@@ -13,8 +14,6 @@ public class PlayAudioService : IPlayAudioService
 
     public async Task Play(Stream stream, float volume = 1, string outputDeviceId = "")
     {
-        volume = Math.Clamp(volume, 0f, 1f); // 0.0 — тишина, 1.0 — макс. громкость
-
         WaveStream? audioFile = null;
 
         try
@@ -23,11 +22,17 @@ public class PlayAudioService : IPlayAudioService
 
             //using var audioFile = new StreamMediaFoundationReader(stream);
             ResolveFileStreamProvider(stream, out audioFile);
+
+            var sampleProvider = audioFile.ToSampleProvider();
+            var volumeProvider = new VolumeSampleProvider(sampleProvider)
+            {
+                Volume = volume
+            };
+
             using var outputDevice = new WaveOutEvent();
             outputDevice.DeviceNumber = deviceNumber;
-            outputDevice.Volume = volume;
-
-            outputDevice.Init(audioFile);
+            outputDevice.Volume = 1f;
+            outputDevice.Init(volumeProvider);
             outputDevice.Play();
             var ct = cancellationTokenSource.Token;
 
@@ -49,8 +54,6 @@ public class PlayAudioService : IPlayAudioService
 
     public async Task Play(string filepath, float volume = 1, string outputDeviceId = "")
     {
-        volume = Math.Clamp(volume, 0f, 1f); // 0.0 — тишина, 1.0 — макс. громкость
-
         FileStream? fileStream = null;
         WaveStream? audioFile = null;
 
@@ -61,11 +64,16 @@ public class PlayAudioService : IPlayAudioService
             //using var audioFile = new AudioFileReader(filepath);
             ResolveFileStreamProvider(filepath, out audioFile, out fileStream);
 
+            var sampleProvider = audioFile.ToSampleProvider();
+            var volumeProvider = new VolumeSampleProvider(sampleProvider)
+            {
+                Volume = volume
+            };
+
             using var outputDevice = new WaveOutEvent();
             outputDevice.DeviceNumber = deviceNumber;
-            outputDevice.Volume = volume;
-
-            outputDevice.Init(audioFile);
+            outputDevice.Volume = 1f;
+            outputDevice.Init(volumeProvider);
             outputDevice.Play();
             var ct = cancellationTokenSource.Token;
 

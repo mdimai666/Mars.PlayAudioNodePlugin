@@ -12,7 +12,7 @@ public class PlayAudioConfigNode : ConfigNode
     public string DefaultOutputDevice { get; set; } = "";
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    [Display(Name = "volume", Description = "0..1")]
-    [Range(0, 1f)]
+    [Display(Name = "volume", Description = "0..1. Values above 1.0 amplify the sound.")]
+    [Range(0, float.MaxValue)]
     public float DefaultPlayVolume { get; set; } = 1f;
 }

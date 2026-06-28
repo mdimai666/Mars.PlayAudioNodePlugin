@@ -1,4 +1,5 @@
 using System.Reflection;
+using Mars.Nodes.Core.Implements.Utils;
 
 namespace Mars.PlayAudioNodePlugin.Host.Services;
 
@@ -6,6 +7,8 @@ public class BuiltInSoundsService
 {
     string _soundsPath;
     public string SoundsPath => _soundsPath;
+
+    string[]? _files;
 
     public BuiltInSoundsService(Assembly mainPluginAssembly)
     {
@@ -18,7 +21,16 @@ public class BuiltInSoundsService
 
     public string[] SoundList()
     {
-        return Directory.GetFiles(_soundsPath, "*.mp3", SearchOption.TopDirectoryOnly).Select(s => s[(_soundsPath.Length + 1)..]).ToArray();
+        if (_files is not null) return _files;
+
+        var fileListUtility = new FileListUtility();
+        return _files ??= fileListUtility.GetFiles(_soundsPath,
+                                                    includeFilter: ".mp3,.wav",
+                                                    maxDepth: 3,
+                                                    returnRelativePaths: true,
+                                                    useRootGitIgnore: false)
+                                        .Select(f => f.Replace('\\', '/'))
+                                        .ToArray();
     }
 
     public string FullPathByName(string name)

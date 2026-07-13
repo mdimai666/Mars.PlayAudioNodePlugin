@@ -1,16 +1,30 @@
+using System.Collections.Concurrent;
 using System.Data;
+using System.Diagnostics;
+using System.Runtime.Versioning;
+using AngleSharp.Dom;
 using Mars.PlayAudioNodePlugin.Host.Features;
 using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Shared.Dto;
 using NAudio.CoreAudioApi;
+using NAudio.SoundFile;
 using NAudio.Wave;
+using NAudio.Wave.Alsa;
 using NAudio.Wave.SampleProviders;
+using NLayer.NAudioSupport;
 
 namespace Mars.PlayAudioNodePlugin.Host.Services;
 
-public class PlayAudioService : IPlayAudioService
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
+internal class PlayAudioService : IPlayAudioService
 {
-    CancellationTokenSource cancellationTokenSource = new();
+    private CancellationTokenSource cancellationTokenSource = new();
+    private readonly ConcurrentDictionary<IWavePlayer, byte> activeOutputDevices = new();
+
+    public PlayAudioService()
+    {
+        AudioPluginInitializer.InitializeNativeLibraries();
+    }
 
     public async Task Play(Stream stream, float volume = 1, string outputDeviceId = "")
     {
@@ -18,33 +32,11 @@ public class PlayAudioService : IPlayAudioService
 
         try
         {
-            var deviceNumber = ResolveAudioDeviceNumber(outputDeviceId);
+            var ext = AudioFormatRecognizer.RecognizeAudioFormat(stream);
+            stream.Position = 0;
+            audioFile = CreateReaderStream(stream, ext);
 
-            //using var audioFile = new StreamMediaFoundationReader(stream);
-            ResolveFileStreamProvider(stream, out audioFile);
-
-            var sampleProvider = audioFile.ToSampleProvider();
-            var volumeProvider = new VolumeSampleProvider(sampleProvider)
-            {
-                Volume = volume
-            };
-
-            using var outputDevice = new WaveOutEvent();
-            outputDevice.DeviceNumber = deviceNumber;
-            outputDevice.Volume = 1f;
-            outputDevice.Init(volumeProvider);
-            outputDevice.Play();
-            var ct = cancellationTokenSource.Token;
-
-            while (outputDevice.PlaybackState == PlaybackState.Playing)
-            {
-                if (ct.IsCancellationRequested)
-                {
-                    outputDevice.Stop();
-                    break;
-                }
-                await Task.Delay(100);
-            }
+            await PlayAudioInternal(audioFile, volume, outputDeviceId);
         }
         finally
         {
@@ -54,38 +46,29 @@ public class PlayAudioService : IPlayAudioService
 
     public async Task Play(string filepath, float volume = 1, string outputDeviceId = "")
     {
+        if (filepath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!OperatingSystem.IsWindows())
+                throw new NotSupportedException("HTTP streaming is not fully supported on non-Windows platforms. Please download the file first.");
+
+            using var httpDevice = CreateOutputDevice(outputDeviceId);
+            using var httpAudioFile = new MediaFoundationReader(filepath);
+            // Для HTTP стриминга оставляем прямую логику без усложнения стримами
+            await PlayAudioStream(httpDevice, httpAudioFile, volume);
+            return;
+        }
+
         FileStream? fileStream = null;
         WaveStream? audioFile = null;
 
         try
         {
-            var deviceNumber = ResolveAudioDeviceNumber(outputDeviceId);
+            fileStream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var ext = Path.GetExtension(filepath).TrimStart('.').ToUpperInvariant();
 
-            //using var audioFile = new AudioFileReader(filepath);
-            ResolveFileStreamProvider(filepath, out audioFile, out fileStream);
+            audioFile = CreateReaderStream(fileStream, ext);
 
-            var sampleProvider = audioFile.ToSampleProvider();
-            var volumeProvider = new VolumeSampleProvider(sampleProvider)
-            {
-                Volume = volume
-            };
-
-            using var outputDevice = new WaveOutEvent();
-            outputDevice.DeviceNumber = deviceNumber;
-            outputDevice.Volume = 1f;
-            outputDevice.Init(volumeProvider);
-            outputDevice.Play();
-            var ct = cancellationTokenSource.Token;
-
-            while (outputDevice.PlaybackState == PlaybackState.Playing)
-            {
-                if (ct.IsCancellationRequested)
-                {
-                    outputDevice.Stop();
-                    break;
-                }
-                await Task.Delay(100);
-            }
+            await PlayAudioInternal(audioFile, volume, outputDeviceId);
         }
         finally
         {
@@ -94,135 +77,137 @@ public class PlayAudioService : IPlayAudioService
         }
     }
 
+    private async Task PlayAudioInternal(WaveStream audioFile, float volume, string outputDeviceId)
+    {
+        var outputDevice = CreateOutputDevice(outputDeviceId);
+        activeOutputDevices.TryAdd(outputDevice, 0);
+
+        try
+        {
+            await PlayAudioStream(outputDevice, audioFile, volume);
+        }
+        finally
+        {
+            activeOutputDevices.TryRemove(outputDevice, out _);
+            outputDevice.Dispose();
+        }
+    }
+
+    // Общий цикл ожидания окончания проигрывания
+    private async Task PlayAudioStream(IWavePlayer outputDevice, WaveStream audioFile, float volume)
+    {
+        var sampleProvider = audioFile.ToSampleProvider();
+        var volumeProvider = new VolumeSampleProvider(sampleProvider) { Volume = volume };
+
+        outputDevice.Init(volumeProvider);
+        outputDevice.Play();
+        var ct = cancellationTokenSource.Token;
+
+        while (outputDevice.PlaybackState == PlaybackState.Playing)
+        {
+            if (ct.IsCancellationRequested)
+            {
+                outputDevice.Stop();
+                break;
+            }
+            await Task.Delay(100);
+        }
+    }
+
     public void StopAll()
     {
-        using var outputDevice = new WasapiOut();
-        outputDevice.Stop();
         cancellationTokenSource.Cancel();
-        cancellationTokenSource = new();
+
+        foreach (var device in activeOutputDevices.Keys)
+        {
+            try
+            {
+                device.Stop();
+            }
+            catch
+            {
+                // Игнорируем ошибки при остановке
+            }
+        }
+        activeOutputDevices.Clear();
+
+        cancellationTokenSource = new CancellationTokenSource();
     }
 
-    internal void ResolveFileStreamProvider(string filePath, out WaveStream readerStream, out FileStream? fileStream)
+    private IWavePlayer CreateOutputDevice(string outputDeviceId)
     {
-        if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        if (OperatingSystem.IsWindows())
         {
-            readerStream = new MediaFoundationReader(filePath);
-            fileStream = null;
-            return;
+            if (string.IsNullOrEmpty(outputDeviceId))
+            {
+                return new WasapiOut(AudioClientShareMode.Shared, 200);
+            }
+
+            var enumerator = new MMDeviceEnumerator();
+            var device = enumerator.GetDevice(outputDeviceId);
+            return new WasapiOut(device, AudioClientShareMode.Shared, false, 200);
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            //TODO: Выбор устройства воспроизведения под линуксом не протестировано.
+            // Для Linux используется ALSA устройство (например, "default" или "hw:0,0")
+            string alsaDeviceName = string.IsNullOrEmpty(outputDeviceId) ? "default" : outputDeviceId;
+            return new AlsaOut(alsaDeviceName);
         }
 
-        fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-        if (filePath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
-        {
-            //readerStream = new WaveFileReader(fileStream);
-            //if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
-            //{
-            //    readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-            //    readerStream = new BlockAlignReductionStream(readerStream);
-            //}
-
-            readerStream = new AudioFileReader(filePath);
-        }
-        else if (filePath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
-        {
-            //if (Environment.OSVersion.Version.Major < 6)
-            //{
-            //    readerStream = new Mp3FileReader(inputStream);
-            //}
-            //else
-            //{
-            //    readerStream = new MediaFoundationReader(filePath);
-            //}
-
-            readerStream = new Mp3FileReader(fileStream);
-        }
-        else if (filePath.EndsWith(".aiff", StringComparison.OrdinalIgnoreCase) || filePath.EndsWith(".aif", StringComparison.OrdinalIgnoreCase))
-        {
-            readerStream = new AiffFileReader(fileStream);
-        }
-        else if (filePath.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase))
-        {
-            readerStream = new NAudio.Vorbis.VorbisWaveReader(fileStream);
-        }
-        else
-        {
-            readerStream = new MediaFoundationReader(filePath);
-        }
+        throw new PlatformNotSupportedException("Audio playback is not supported on this platform");
     }
 
-    internal void ResolveFileStreamProvider(Stream inputStream, out WaveStream readerStream)
+    private WaveStream CreateReaderStream(Stream stream, string format)
     {
-        var ext = AudioFormatRecognizer.RecognizeAudioFormat(inputStream);
-        inputStream.Position = 0;
+        return format switch
+        {
+            "WAV" => OperatingSystem.IsWindows()
+                ? new StreamMediaFoundationReader(stream)
+                : new WaveFileReader(stream),
 
-        if (ext == "WAV")
-        {
-            //readerStream = new WaveFileReader(inputStream);
-            //if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
-            //{
-            //    readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-            //    readerStream = new BlockAlignReductionStream(readerStream);
-            //}
-            readerStream = new StreamMediaFoundationReader(inputStream);
-        }
-        else if (ext == "MP3")
-        {
-            //if (Environment.OSVersion.Version.Major < 6)
-            //{
-            readerStream = new Mp3FileReader(inputStream);
-            //}
-            //else
-            //{
-            //    readerStream = new MediaFoundationReader(inputStream);
-            //}
-        }
-        else if (ext == "AIFF" || ext == "AIF")
-        {
-            readerStream = new AiffFileReader(inputStream);
-        }
-        else if (ext == "OGG")
-        {
-            readerStream = new NAudio.Vorbis.VorbisWaveReader(inputStream);
-        }
-        //else
-        //{
-        //    readerStream = new MediaFoundationReader(filePath);
-        //}
-        else
-            throw new NotImplementedException($"type not recognized '{ext}'");
+            "MP3" => new Mp3FileReaderBase(stream, new Mp3FileReaderBase.FrameDecompressorBuilder(wf => new Mp3FrameDecompressor(wf))),
+
+            "AIFF" or "AIF" => new AiffFileReader(stream),
+
+            "OGG" or "FLAC" or "OPUS" => new SoundFileReader(stream),
+
+            _ => OperatingSystem.IsWindows()
+                ? new StreamMediaFoundationReader(stream) // Фоллбэк для Windows (использует системные кодеки)
+                : throw new NotSupportedException($"Unsupported audio format on this platform: {format}")
+        };
     }
 
-    internal MMDevice ResolveAudioDevice(string id)
+    public OutputDeviceResponse[] OutputDevices()
     {
-        using var enumerator = new MMDeviceEnumerator();
-
-        if (string.IsNullOrEmpty(id))
+        if (OperatingSystem.IsWindows())
         {
-            var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            return defaultDevice;
+            var devices = EnumerateWindowsAudioEndPoints();
+            return devices.Select((d, i) => new OutputDeviceResponse
+            {
+                DeviceId = d.ID,
+                DeviceName = d.DeviceFriendlyName,
+                FriendlyName = d.FriendlyName,
+                IsDefault = i == 0
+            }).ToArray();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            var devices = EnumerateLinuxAudioEndPoints();
+            return devices.Select((d, i) => new OutputDeviceResponse
+            {
+                DeviceId = d.Name,
+                DeviceName = d.Name,
+                FriendlyName = d.Name,
+                IsDefault = i == 0
+            }).ToArray();
         }
 
-        return enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
-            .FirstOrDefault(x => x.ID == id) ?? throw new ArgumentException($"device id='{id}' not found");
-    }
-    internal int ResolveAudioDeviceNumber(string id)
-    {
-
-        if (string.IsNullOrEmpty(id))
-        {
-            return -1;//default device
-        }
-
-        using var enumerator = new MMDeviceEnumerator();
-        var list = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).Select(s => s.ID).ToArray();
-
-        var index = list.IndexOf(id);
-
-        return index > -1 ? index : throw new ArgumentException($"device id='{id}' not found");
+        throw new PlatformNotSupportedException("Audio device enumeration is not supported on this platform");
     }
 
-    internal IEnumerable<MMDevice> EnumerateAudioEndPoints()
+    [SupportedOSPlatform("windows")]
+    private IEnumerable<MMDevice> EnumerateWindowsAudioEndPoints()
     {
         using var enumerator = new MMDeviceEnumerator();
         var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
@@ -233,16 +218,77 @@ public class PlayAudioService : IPlayAudioService
         return devices;
     }
 
-    public OutputDeviceResponse[] OutputDevices()
+    [SupportedOSPlatform("linux")]
+    private IEnumerable<AlsaDeviceInfo> EnumerateLinuxAudioEndPoints()
     {
-        var devices = EnumerateAudioEndPoints(); //default will first
+        return AlsaDeviceEnumerator.GetPlaybackDevices();
+    }
 
-        return devices.Select((d, i) => new OutputDeviceResponse
+    /**
+     TODO: Еще не проверял, чтобы под линуком можно было выбрать устройство.
+     Компонент AlsaOut в NAudio умеет работать с именами PulseAudio.
+    Если вы передадите туда deviceId, полученный из pactl (например, alsa_output.pci-0000_00_1f.3.analog-stereo), ALSA перенаправит поток точечно в этот аудиовыход.
+     */
+    [SupportedOSPlatform("linux")]
+    internal Dictionary<string, string> GetAdvancedLinuxDevices()
+    {
+        var devices = new Dictionary<string, string>
         {
-            DeviceId = d.ID,
-            DeviceName = d.DeviceFriendlyName,
-            FriendlyName = d.FriendlyName,
-            IsDefault = i == 0
-        }).ToArray();
+            { "default", "Системный выход по умолчанию" }
+        };
+
+        if (!OperatingSystem.IsLinux()) return devices;
+
+        try
+        {
+            // Вызываем системную утилиту pactl, которая общается с PulseAudio/PipeWire
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "pactl",
+                Arguments = "list short sinks", // Получаем краткий список аудиовыходов
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process != null)
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                // Вывод pactl выглядит так:
+                // 52  alsa_output.pci-0000_00_1f.3.analog-stereo  module-alsa-card  s16le 2ch 48000Hz
+                // 105 bluez_output.74_5C_43_A1_B2_C3.a2dp-sink     module-bluez5-device s16le 2ch 44100Hz
+                var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var line in lines)
+                {
+                    var parts = line.Split('\t');
+                    if (parts.Length > 1)
+                    {
+                        string deviceId = parts[1].Trim(); // Идентификатор для ALSA/Pulse (например, alsa_output...)
+
+                        // Делаем имя красивым и понятным для пользователя
+                        string displayName = deviceId;
+                        if (deviceId.Contains("bluez")) displayName = "🎧 Bluetooth Наушники/Гарнитура";
+                        else if (deviceId.Contains("hdmi")) displayName = "📺 Дисплей / HDMI аудиовыход";
+                        else if (deviceId.Contains("analog-stereo")) displayName = "🔊 Встроенные динамики / Колонки";
+
+                        if (!devices.ContainsKey(deviceId))
+                        {
+                            devices.Add(deviceId, displayName);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении списка аудиоустройств: {ex.Message}");
+            // Если pactl не установлен в дистрибутиве, останется только дефолтный девайс
+        }
+
+        return devices;
     }
 }

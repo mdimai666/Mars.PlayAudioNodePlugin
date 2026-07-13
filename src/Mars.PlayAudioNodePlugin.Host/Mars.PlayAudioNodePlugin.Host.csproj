@@ -9,24 +9,57 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="C:\Users\D\.nuget\packages\naudio.vorbis\1.5.0\contentFiles\any\netstandard2.0\README.md" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\Mars.PlayAudioNodePlugin.Host.Shared\Mars.PlayAudioNodePlugin.Host.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.7.7-alpha.19" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
-        <PackageReference Include="NAudio" Version="2.3.0" />
-        <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+        <PackageReference Include="NAudio" Version="3.0.0-preview.17" />
+        <PackageReference Include="NAudio.Alsa" Version="3.0.0-preview.17" />
+        <PackageReference Include="NAudio.SoundFile" Version="3.0.0-preview.17" />
+        <PackageReference Include="NAudio.Wasapi" Version="3.0.0-preview.17" />
+        <PackageReference Include="NLayer.NAudioSupport" Version="2.0.1" />
     </ItemGroup>
 
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>PlayAudioNodePluginConsoleApp</_Parameter1>
         </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Test.PlayAudioNodePlugin</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+        <PackageReference Include="NAudio.Dmo">
+            <Version>3.0.0-preview.17</Version>
+        </PackageReference>
+        <PackageReference Include="NAudio.WinMM">
+            <Version>3.0.0-preview.17</Version>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="libs\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="libs\flac.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="libs\libsndfile.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="libs\ogg.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="libs\vorbis.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="libs\vorbisenc.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

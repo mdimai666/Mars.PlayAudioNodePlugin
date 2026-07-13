@@ -3,11 +3,9 @@ using Mars.PlayAudioNodePlugin;
 using Mars.PlayAudioNodePlugin.Host;
 using Mars.PlayAudioNodePlugin.Host.Services;
 using Mars.PlayAudioNodePlugin.Host.Shared;
-using Mars.PlayAudioNodePlugin.Nodes;
 using Mars.PlayAudioNodePlugin.Nodes.Nodes;
 using Mars.Plugin.Abstractions;
 using Mars.Plugin.Kit.Host;
-using Mars.Plugin.PluginHost;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -47,10 +45,6 @@ public class MainMarsPlayAudioNodePlugin : WebApplicationPlugin
             _ = pas.Play(filePath, 1f);
             return TypedResults.Ok();
         });
-
-#if DEBUG
-        app.UseDevelopingServePluginFilesDefinition(GetType().Assembly, settings, [typeof(PlayAudioNodePluginFront).Assembly, GetType().Assembly]);
-#endif
 
         //var op = app.Services.GetRequiredService<IOptionService>();
         //op.RegisterOption<Example1Plugin1>(appendToInitialSiteData: true);

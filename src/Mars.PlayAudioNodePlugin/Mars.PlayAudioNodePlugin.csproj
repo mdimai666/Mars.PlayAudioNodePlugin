@@ -41,13 +41,16 @@
 
     <ItemGroup>
         <None Include="..\..\assets\icon.png" Pack="true" PackagePath="\" Link="wwwroot\icon.png" CopyToOutputDirectory="PreserveNewest" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300" PrivateAssets="All" />
+        <PackageReference Include="mdimai666.Mars.Plugin.Sdk" Version="0.8.1-alpha.4">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.400" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="mdimai666.Mars.Plugin.PluginPublishScript" Version="0.7.7-alpha.20" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.9" PrivateAssets="all" />
-        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.7.7-alpha.20" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.11" PrivateAssets="all" />
+        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.8.1-alpha.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -61,13 +64,5 @@
         <ProjectReference Include="..\Mars.PlayAudioNodePlugin.Host\Mars.PlayAudioNodePlugin.Host.csproj" />
         <ProjectReference Include="..\Mars.PlayAudioNodePlugin.Nodes\Mars.PlayAudioNodePlugin.Nodes.csproj" />
     </ItemGroup>
-
-    <Target Name="RunPostPublishScript" AfterTargets="111Publish" Condition="'$(Configuration)' == 'Release'">
-        <Exec Command="dotnet $(NuGetPackageRoot)mdimai666.Mars.Plugin.PluginPublishScript\0.7.7-alpha.19\lib\net10.0\Mars.Plugin.PluginPublishScript.dll --run-postpublish --ProjectName=$(ProjectName) --out=$(PublishDir) --ProjectDir=$(ProjectDir)" />
-    </Target>
-
-    <Target Name="RunPostCompileDebugScript" AfterTargets="CoreBuild111" Condition="'$(Configuration)' == 'Debug'">
-        <Exec Command="dotnet $(NuGetPackageRoot)mdimai666.Mars.Plugin.PluginPublishScript\0.7.7-alpha.19\lib\net10.0\Mars.Plugin.PluginPublishScript.dll --run-postdebugcompile --ProjectName=$(ProjectName) --out=$(OutDir) --ProjectDir=$(ProjectDir)" />
-    </Target>
 
 </Project>

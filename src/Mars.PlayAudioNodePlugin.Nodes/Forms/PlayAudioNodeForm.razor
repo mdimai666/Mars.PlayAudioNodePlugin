@@ -1,5 +1,5 @@
-@using AppFront.Shared.Components
 @using Flurl.Http
+@using Mars.Admin.Framework.Components
 @using Mars.Core.Extensions
 @using Mars.Core.Models
 @using Mars.Nodes.Core
@@ -53,7 +53,7 @@
     PlayAudioNode Node { get => (PlayAudioNode)Value!; set => Value = value; }
 
     [Inject] IFlurlClient _client { get; set; } = default!;
-    [Inject] AppFront.Shared.Interfaces.IMessageService _messageService { get; set; } = default!;
+    [Inject] Admin.Framework.Interfaces.IMessageService _messageService { get; set; } = default!;
     [Inject] IMemoryCache _cache { get; set; } = default!;
 
     string _builtInSoundsUrl = "/api/PlayAudioNodePlugin/BuiltInSounds";

@@ -13,13 +13,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.7.7-alpha.20" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
-        <PackageReference Include="NAudio" Version="3.0.0-preview.17" />
-        <PackageReference Include="NAudio.Alsa" Version="3.0.0-preview.17" />
-        <PackageReference Include="NAudio.SoundFile" Version="3.0.0-preview.17" />
-        <PackageReference Include="NAudio.Wasapi" Version="3.0.0-preview.17" />
-        <PackageReference Include="NLayer.NAudioSupport" Version="2.0.1" />
+        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.8.1-alpha.4" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
+        <PackageReference Include="NAudio" Version="3.0.1" />
+        <PackageReference Include="NAudio.Alsa" Version="3.0.1" />
+        <PackageReference Include="NAudio.SoundFile" Version="3.0.1" />
+        <PackageReference Include="NAudio.Wasapi" Version="3.0.1" />
+        <PackageReference Include="NLayer.NAudioSupport" Version="3.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,10 +33,10 @@
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
         <PackageReference Include="NAudio.Dmo">
-            <Version>3.0.0-preview.17</Version>
+            <Version>3.0.1</Version>
         </PackageReference>
         <PackageReference Include="NAudio.WinMM">
-            <Version>3.0.0-preview.17</Version>
+            <Version>3.0.1</Version>
         </PackageReference>
     </ItemGroup>
 

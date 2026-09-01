@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-[assembly: WebApplicationPlugin(typeof(MainMarsPlayAudioNodePlugin))]
+[assembly: MarsPlugin(typeof(MainMarsPlayAudioNodePlugin))]
 
 namespace Mars.PlayAudioNodePlugin;
 
-public class MainMarsPlayAudioNodePlugin : WebApplicationPlugin
+public class MainMarsPlayAudioNodePlugin : MarsPlugin
 {
     public const string PluginPackageName = "mdimai666.Mars.PlayAudioNodePlugin";
 

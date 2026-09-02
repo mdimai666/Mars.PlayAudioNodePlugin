@@ -41,7 +41,7 @@
 
     <ItemGroup>
         <None Include="..\..\assets\icon.png" Pack="true" PackagePath="\" Link="wwwroot\icon.png" CopyToOutputDirectory="PreserveNewest" />
-        <PackageReference Include="mdimai666.Mars.Plugin.Sdk" Version="0.8.3-alpha.11">
+        <PackageReference Include="mdimai666.Mars.Plugin.Sdk" Version="0.8.3-alpha.12">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

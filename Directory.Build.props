@@ -1,0 +1,11 @@
+<Project>
+    <PropertyGroup>
+        <!-- Версия плагина: единый источник (номер пакета, тег релиза, CI). -->
+        <PluginVersion>0.7.2</PluginVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- Единая версия для всех проектов: под-проекты получают ту же assembly-version. -->
+        <Version>$(PluginVersion)</Version>
+    </PropertyGroup>
+</Project>

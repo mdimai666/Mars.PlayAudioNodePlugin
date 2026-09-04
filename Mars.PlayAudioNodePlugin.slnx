@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/devStands/">
+    <Project Path="src/PlayAudioNodePluginConsoleApp/PlayAudioNodePluginConsoleApp.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Test.PlayAudioNodePlugin/Test.PlayAudioNodePlugin.csproj" />
+  </Folder>
+  <Project Path="src/Mars.PlayAudioNodePlugin.Host.Shared/Mars.PlayAudioNodePlugin.Host.Shared.csproj" />
+  <Project Path="src/Mars.PlayAudioNodePlugin.Host/Mars.PlayAudioNodePlugin.Host.csproj" />
+  <Project Path="src/Mars.PlayAudioNodePlugin.Nodes/Mars.PlayAudioNodePlugin.Nodes.csproj" />
+  <Project Path="src/Mars.PlayAudioNodePlugin.Shared/Mars.PlayAudioNodePlugin.Shared.csproj" />
+  <Project Path="src/Mars.PlayAudioNodePlugin/Mars.PlayAudioNodePlugin.csproj" />
+</Solution>

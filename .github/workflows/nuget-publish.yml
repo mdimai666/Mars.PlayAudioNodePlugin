@@ -2,7 +2,7 @@
 # Настройка на nuget.org: учётка -> Trusted Publishing -> политика: owner, репозиторий
 # mdimai666/Mars.PlayAudioNodePlugin, workflow-файл nuget-publish.yml. В секретах репозитория:
 # NUGET_USER (имя профиля nuget.org, не email).
-# Версия берётся из <Version> в csproj плагина; тег обязан совпадать с ней (v0.7.1 и т.п.).
+# Версия берётся из PluginVersion в Directory.Build.props; тег обязан совпадать с ней (v0.7.2 и т.п.).
 name: Publish NuGet package
 
 on:

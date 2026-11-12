@@ -16,17 +16,17 @@
     <div class="vstack gap-2">
 
         <FormItem2 For="() => Node.DefaultOutputDevice">
-            <FluentSelect TOption="OutputDeviceResponse"
+            <FluentSelect TOption="OutputDeviceResponse" TValue="string"
                           Items="_outputDevices"
                           Class="w-100"
                           OptionText="@(f=>f.FriendlyName)"
                           OptionValue="@(f=>f.DeviceId)"
-                          @bind-SelectedOption="_selOutputDevice"
+                          @bind-SelectedItem="_selOutputDevice"
                           @bind-Value=@Node.DefaultOutputDevice />
         </FormItem2>
 
         <FormItem2 For="() => Node.DefaultPlayVolume">
-            <FluentNumberField TValue="float" @bind-Value=@Node.DefaultPlayVolume Class="" Min="-1" />
+            <FluentNumberInput TValue="float" @bind-Value=@Node.DefaultPlayVolume Class="" Min="@(-1f)" />
         </FormItem2>
 
     </div>
@@ -50,7 +50,7 @@
         if (_outputDevices.Length == 0) Load();
     }
 
-    OutputDeviceResponse _selOutputDevice = empty;
+    OutputDeviceResponse? _selOutputDevice = empty;
 
     async void Load()
     {

@@ -26,23 +26,23 @@
         @if (Node.PlayFromBuiltInSounds)
         {
             <FormItem2 For="() => Node.BuiltInSoundsName">
-                <FluentSelect TOption="string"
+                <FluentSelect TOption="string" TValue="string"
                               Items="_builtInSounds"
                               Class=""
-                              SelectedOptionChanged="SelectedOptionChanged_BuiltInSoundsName"
-                              @bind-Value=@Node.BuiltInSoundsName />
+                              @bind-Value=@Node.BuiltInSoundsName
+                              @bind-Value:after="() => SelectedOptionChanged_BuiltInSoundsName(Node.BuiltInSoundsName)" />
             </FormItem2>
         }
         else
         {
 
             <FormItem2 For="() => Node.AudioUri">
-                <FluentTextField @bind-Value=@Node.AudioUri Class="w-100" />
+                <FluentTextInput @bind-Value=@Node.AudioUri Class="w-100" />
             </FormItem2>
         }
 
         <FormItem2 For="() => Node.Volume">
-            <FluentNumberField @bind-Value=@Node.Volume Min="-1" Step="0.2" />
+            <FluentNumberInput TValue="float" @bind-Value=@Node.Volume Min="@(-1f)" Step="@(0.2f)" />
         </FormItem2>
 
     </div>

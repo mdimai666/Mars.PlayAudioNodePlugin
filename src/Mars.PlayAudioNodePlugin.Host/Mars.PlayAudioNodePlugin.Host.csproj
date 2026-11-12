@@ -13,12 +13,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.8.3-alpha.14" />
-        <PackageReference Include="NAudio" Version="3.0.1" />
-        <PackageReference Include="NAudio.Alsa" Version="3.0.1" />
-        <PackageReference Include="NAudio.SoundFile" Version="3.0.1" />
-        <PackageReference Include="NAudio.Wasapi" Version="3.0.1" />
-        <PackageReference Include="NLayer.NAudioSupport" Version="3.0.0" />
+        <PackageReference Include="mdimai666.Mars.Plugin.Kit.Host" Version="0.8.4-alpha.57" />
+        <PackageReference Include="NAudio" Version="3.4.0-preview.1" />
+        <PackageReference Include="NAudio.Alsa" Version="3.4.0-preview.1" />
+        <PackageReference Include="NAudio.SoundFile" Version="3.4.0-preview.1" />
+        <PackageReference Include="NAudio.Wasapi" Version="3.4.0-preview.1" />
+        <PackageReference Include="NLayer.NAudioSupport" Version="3.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,10 +32,10 @@
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
         <PackageReference Include="NAudio.Dmo">
-            <Version>3.0.1</Version>
+            <Version>3.4.0-preview.1</Version>
         </PackageReference>
         <PackageReference Include="NAudio.WinMM">
-            <Version>3.0.1</Version>
+            <Version>3.4.0-preview.1</Version>
         </PackageReference>
     </ItemGroup>
 

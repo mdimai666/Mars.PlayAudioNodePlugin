@@ -1,4 +1,5 @@
 using Mars.Nodes.Abstractions;
+using Mars.Nodes.Contracts.Hubs;
 using Mars.Nodes.Core;
 using Mars.PlayAudioNodePlugin.Host.Shared;
 using Mars.PlayAudioNodePlugin.Nodes.Nodes;
